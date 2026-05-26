@@ -1,0 +1,15 @@
+# Environment variables with secrets
+.env
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Docker volumes data (if mounted locally)
+data/
+
+# Logs
+*.log
