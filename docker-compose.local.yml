@@ -90,6 +90,23 @@ services:
       - "${WORKERD_PORT:-8787}:8787"
     restart: unless-stopped
 
+  agent-worker:
+    build:
+      context: ./agent-worker
+      dockerfile: Dockerfile
+    environment:
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL:-http://localhost:8080}
+      MULTICA_APP_URL: ${MULTICA_APP_URL:-http://localhost:3000}
+      MULTICA_AUTH_TOKEN: ${MULTICA_AUTH_TOKEN:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+    volumes:
+      - agent_workspaces:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
 volumes:
   pgdata:
   backend_uploads:
+  agent_workspaces:
