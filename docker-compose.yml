@@ -1,16 +1,13 @@
 # Multica - Dokploy Docker Compose
 # 
-# Tipo recomendado en Dokploy: docker-compose (no stack)
-# Esto permite depends_on con healthchecks y redes externas.
+# Tipo recomendado en Dokploy: docker-compose
+# 
+# Configura los dominios desde la UI de Dokploy:
+#   - frontend (puerto 3000): app.tudominio.com
+#   - backend (puerto 8080): api.tudominio.com
 #
-# Servicios:
-#   - postgres: PostgreSQL 17 con pgvector (interno)
-#   - backend: API de Multica (puerto 8080)
-#   - frontend: Aplicación web Next.js (puerto 3000)
-#
-# Dominios a configurar en Dokploy UI:
-#   - frontend: app.tudominio.com (o el que prefieras)
-#   - backend: api.tudominio.com (o el que prefieras)
+# NO uses "ports:" — Dokploy/Traefik se encarga del enrutamiento.
+# Solo usa "expose:" para que Traefik descubra los puertos internos.
 
 name: multica
 
@@ -29,14 +26,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - dokploy-network
 
   backend:
     image: ghcr.io/multica-ai/multica-backend:${MULTICA_IMAGE_TAG:-latest}
     depends_on:
       postgres:
         condition: service_healthy
+    expose:
+      - "8080"
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-multica}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-multica}?sslmode=disable
       PORT: "8080"
@@ -78,24 +75,18 @@ services:
     volumes:
       - backend_uploads:/app/data/uploads
     restart: unless-stopped
-    networks:
-      - dokploy-network
 
   frontend:
     image: ghcr.io/multica-ai/multica-web:${MULTICA_IMAGE_TAG:-latest}
     depends_on:
       - backend
+    expose:
+      - "3000"
     environment:
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
     restart: unless-stopped
-    networks:
-      - dokploy-network
 
 volumes:
   pgdata:
   backend_uploads:
-
-networks:
-  dokploy-network:
-    external: true
