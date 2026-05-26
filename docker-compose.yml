@@ -87,6 +87,14 @@ services:
       PORT: "3000"
     restart: unless-stopped
 
+  workerd:
+    build:
+      context: ./workerd
+      dockerfile: Dockerfile
+    expose:
+      - "8787"
+    restart: unless-stopped
+
 volumes:
   pgdata_v2:
   backend_uploads:

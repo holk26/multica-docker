@@ -82,6 +82,14 @@ services:
       HOSTNAME: "0.0.0.0"
     restart: unless-stopped
 
+  workerd:
+    build:
+      context: ./workerd
+      dockerfile: Dockerfile
+    ports:
+      - "${WORKERD_PORT:-8787}:8787"
+    restart: unless-stopped
+
 volumes:
   pgdata:
   backend_uploads:
