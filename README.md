@@ -9,6 +9,17 @@ Configuración lista para desplegar [Multica](https://multica.ai) en tu propia i
 | 🏠 **Local** | `docker-compose.local.yml` | Desarrollo / pruebas en tu máquina |
 | 🌐 **Dokploy (VPS)** | `docker-compose.yml` | Producción en tu VPS con Dokploy |
 
+### Servicios incluidos
+
+| Servicio | Imagen | Puerto | Descripción |
+|----------|--------|--------|-------------|
+| PostgreSQL | `pgvector/pgvector:pg17` | 5432 | Base de datos |
+| Backend API | `ghcr.io/multica-ai/multica-backend` | 8080 | API de Multica |
+| Frontend Web | `ghcr.io/multica-ai/multica-web` | 3000 | App web |
+| **Kimi Worker** | `agent-worker/Dockerfile` | — | 🧠 Kimi CLI + daemon Multica |
+
+> 💡 El **Kimi Worker** es un contenedor dedicado con el agente de IA [Kimi](https://github.com/MoonshotAI/kimi-cli) de Moonshot AI, conectado al demonio de Multica. Perfecto para tener un entorno de ejecución de código en la nube siempre disponible. Ver [`agent-worker/README.md`](agent-worker/README.md).
+
 ---
 
 ## 🏠 Local

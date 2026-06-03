@@ -87,14 +87,6 @@ services:
       PORT: "3000"
     restart: unless-stopped
 
-  workerd:
-    build:
-      context: ./workerd
-      dockerfile: Dockerfile
-    expose:
-      - "8787"
-    restart: unless-stopped
-
   agent-worker:
     build:
       context: ./agent-worker
@@ -111,7 +103,58 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 
+  # =============================================================================
+  # Kimi + Multica Agent Worker
+  # =============================================================================
+  # Contenedor dedicado con Kimi CLI (Moonshot AI) + demonio de Multica.
+  # Ideal para tener un entorno de ejecución de código en la nube siempre activo.
+  #
+  # Uso:
+  #   docker compose up -d kimi-worker
+  #   docker exec -it multica-kimi-worker-1 bash
+  #   → dentro: `kimi` para iniciar el agente interactivo
+  # =============================================================================
+  kimi-worker:
+    build:
+      context: ./agent-worker
+      dockerfile: Dockerfile
+    container_name: multica-kimi-worker
+    environment:
+      # --- Multica ---
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_AUTH_TOKEN: ${MULTICA_AUTH_TOKEN:-}
+      # --- Kimi (Moonshot AI) ---
+      KIMI_API_KEY: ${KIMI_API_KEY:-}
+      MOONSHOT_API_KEY: ${KIMI_API_KEY:-}
+      # --- Opcional: otras APIs para el agente ---
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+    volumes:
+      # Workspace persistente para proyectos
+      - kimi_workspaces:/workspace
+      # Acceso al Docker del host (Kimi puede lanzar contenedores)
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Configuraciones persistentes
+      - kimi_config:/root/.config
+      - kimi_cache:/root/.cache
+    # Modo interactivo para poder hacer `docker exec -it ... bash`
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    # Healthcheck interno
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 volumes:
   pgdata_v2:
   backend_uploads:
   agent_workspaces:
+  kimi_workspaces:
+  kimi_config:
+  kimi_cache:

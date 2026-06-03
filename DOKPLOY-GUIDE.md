@@ -19,6 +19,9 @@ Esta guía te lleva paso a paso para montar **Multica** (https://multica.ai) en 
 | PostgreSQL | `pgvector/pgvector:pg17` | 5432 | ❌ No |
 | Backend API | `ghcr.io/multica-ai/multica-backend` | 8080 | ✅ Sí (API) |
 | Frontend Web | `ghcr.io/multica-ai/multica-web` | 3000 | ✅ Sí (App) |
+| **Kimi Worker** | `agent-worker/Dockerfile` | — | ❌ No (exec interno) |
+
+> 🧠 El **Kimi Worker** es un contenedor con [Kimi CLI](https://github.com/MoonshotAI/kimi-cli) (Moonshot AI) + demonio de Multica. Se accede vía `docker exec` para tener un entorno de ejecución de código en la nube siempre disponible. Ver [`agent-worker/README.md`](agent-worker/README.md).
 
 ---
 
@@ -68,6 +71,13 @@ nano .env
 - **Opción A (Recomendada):** Configura `RESEND_API_KEY` desde [resend.com](https://resend.com)
 - **Opción B:** Configura las variables `SMTP_*` con tu servidor de correo
 - **Sin email:** Los códigos de verificación aparecerán en los logs del backend
+
+**Kimi Worker (opcional pero recomendado):**
+
+| Variable | Descripción | Dónde obtener |
+|----------|-------------|---------------|
+| `KIMI_API_KEY` | API Key de Moonshot AI para Kimi CLI | [platform.moonshot.cn](https://platform.moonshot.cn/) |
+| `MULTICA_AUTH_TOKEN` | Token de tu cuenta en Multica | Logueate en la web → Settings → API Tokens |
 
 ---
 
@@ -171,6 +181,34 @@ Abre en tu navegador:
    - Busca el código de verificación en los logs
 5. Introduce el código y completa el registro
 
+### 6.3 Conectar el Kimi Worker (opcional)
+
+Si configuraste `KIMI_API_KEY`, el contenedor `kimi-worker` se levanta automáticamente con Kimi CLI listo.
+
+**Conectarte al worker:**
+
+```bash
+# Desde el servidor Dokploy/VPS:
+docker exec -it multica-kimi-worker bash
+
+# Dentro del contenedor:
+kimi                    # Iniciar Kimi interactivo
+kimi --version          # Ver versión
+```
+
+**Ver logs del worker:**
+
+En Dokploy → servicio `multica-stack` → Logs → filtrar por `kimi-worker`.
+
+**Uso típico:**
+
+1. Montá tu repo en `/workspace/projects` (editá el `volumes` en `docker-compose.yml`)
+2. Entrá al contenedor con `docker exec`
+3. Ejecutá `kimi` y pedile que trabaje en tu código
+4. Kimi puede leer/escribir archivos, ejecutar shell, lanzar Docker, etc.
+
+> 📚 Más info en [`agent-worker/README.md`](agent-worker/README.md).
+
 ---
 
 ## 🔒 Recomendaciones de Seguridad
@@ -214,6 +252,21 @@ MULTICA_IMAGE_TAG=v0.2.25
 ```
 
 Y luego redeploya.
+
+### Actualizar Kimi Worker
+
+El `kimi-worker` se construye desde el `Dockerfile` local. Para actualizarlo (por ejemplo, después de modificar el `Dockerfile`):
+
+1. Editá `agent-worker/Dockerfile` o `agent-worker/entrypoint.sh`
+2. En Dokploy, redeploya el servicio `multica-stack`
+3. Dokploy reconstruirá la imagen automáticamente
+
+Para forzar una reconstrucción limpia:
+```bash
+# Desde el servidor:
+docker compose -f /path/to/compose.yml build --no-cache kimi-worker
+docker compose -f /path/to/compose.yml up -d kimi-worker
+```
 
 ---
 
