@@ -87,6 +87,55 @@ services:
       PORT: "3000"
     restart: unless-stopped
 
+  agent-worker:
+    build:
+      context: ./agent-worker
+      dockerfile: Dockerfile
+    environment:
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_AUTH_TOKEN: ${MULTICA_AUTH_TOKEN:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+    volumes:
+      - agent_workspaces:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  kimi-worker:
+    build:
+      context: ./agent-worker
+      dockerfile: Dockerfile
+    container_name: multica-kimi-worker
+    environment:
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_AUTH_TOKEN: ${MULTICA_AUTH_TOKEN:-}
+      KIMI_API_KEY: ${KIMI_API_KEY:-}
+      MOONSHOT_API_KEY: ${KIMI_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+    volumes:
+      - kimi_workspaces:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kimi_config:/root/.config
+      - kimi_cache:/root/.cache
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 volumes:
   pgdata_v2:
   backend_uploads:
+  agent_workspaces:
+  kimi_workspaces:
+  kimi_config:
+  kimi_cache:
