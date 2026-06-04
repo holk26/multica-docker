@@ -88,9 +88,8 @@ services:
     restart: unless-stopped
 
   agent-worker:
-    build:
-      context: ./agent-worker
-      dockerfile: Dockerfile
+    image: ghcr.io/holk26/multica-worker:latest
+    pull_policy: always
     environment:
       MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
       MULTICA_APP_URL: ${MULTICA_APP_URL}
@@ -104,9 +103,8 @@ services:
     restart: unless-stopped
 
   kimi-worker:
-    build:
-      context: ./agent-worker
-      dockerfile: Dockerfile
+    image: ghcr.io/holk26/multica-worker:latest
+    pull_policy: always
     container_name: multica-kimi-worker
     environment:
       MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
