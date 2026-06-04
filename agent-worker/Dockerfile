@@ -40,11 +40,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
 RUN pip install --no-cache-dir kimi-cli
 
 # -----------------------------------------------------------------------------
-# 4. Multica CLI
+# 4. Multica CLI (best-effort — install script may not always be available)
 # -----------------------------------------------------------------------------
 RUN mkdir -p /root/.local/bin && \
-    curl -fsSL https://multica.ai/install.sh | bash && \
-    ln -sf /root/.local/bin/multica /usr/local/bin/multica 2>/dev/null || true
+    (curl -fsSL https://multica.ai/install.sh | bash && \
+     ln -sf /root/.local/bin/multica /usr/local/bin/multica 2>/dev/null) || \
+    echo "⚠️  Multica install script unavailable — skipping"
 
 # -----------------------------------------------------------------------------
 # 5. Configurar entorno

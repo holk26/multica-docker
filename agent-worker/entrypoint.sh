@@ -39,8 +39,7 @@ fi
 if command -v multica &> /dev/null; then
     echo "  ✅ Multica CLI: $(multica --version 2>/dev/null || echo 'instalado')"
 else
-    echo "  ❌ Multica CLI no encontrado"
-    exit 1
+    echo "  ⚠️  Multica CLI no encontrado (entorno Kimi-only)"
 fi
 
 if command -v docker &> /dev/null; then
