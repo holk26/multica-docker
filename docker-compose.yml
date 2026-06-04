@@ -89,7 +89,6 @@ services:
 
   agent-worker:
     image: ghcr.io/holk26/multica-worker:latest
-    pull_policy: always
     environment:
       MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
       MULTICA_APP_URL: ${MULTICA_APP_URL}
@@ -104,7 +103,6 @@ services:
 
   kimi-worker:
     image: ghcr.io/holk26/multica-worker:latest
-    pull_policy: always
     container_name: multica-kimi-worker
     environment:
       MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
